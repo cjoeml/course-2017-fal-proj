@@ -30,9 +30,11 @@ def index_snow():
 
 @app.route('/visualization')
 def visualization():
+    authData = dml.auth;
+    api_key = authData['services']['googleportal']['key']
+    print("Loaded API key:", api_key)
     # here we want to get the value of user (i.e. ?means=some-value)
     try:
-        api_key = str(request.args.get('api_key'))
         num_routes = int(request.args.get('num_routes'))
         means = int(request.args.get('means'))
         markers = str(request.args.get('markers'))
@@ -73,7 +75,6 @@ def visualization():
         for street in streets:
             url = baseURL + street.replace(" ", "+") + '+Boston+Massachusetts&key=' + api_key
             markerURLs.append(url)
-        print(markerURLs)
         
         markerCoordList = []
         for i in range(len(markerURLs)):
