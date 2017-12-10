@@ -11,7 +11,7 @@ function initMap() {
 	});
 
 	heatmap = new google.maps.visualization.HeatmapLayer({
-		data: kMeansData(),
+		data: centroidHMLocations(),
 		map: map
 	});
 
@@ -37,7 +37,6 @@ function initMap() {
     }
 
     //alert(rawKMeansData);
-    centroidData = kMeansStuff();
 
     initHeatMap();
     generateMarkers();
@@ -246,61 +245,31 @@ function markerLocations() {
 }
 
 function centroidLocations() {
-    return [[42.3340820819,
-        -71.10586771785],
-        [42.3495376231,
-        -71.1419411892],
-        [42.331648631075,
-        -71.098239928575],
-        [42.33046328958,
-        -71.1070608519],
-        [42.3360449123,
-        -71.10826387746667],
-        [42.3358606402,
-        -71.10826387746667],
-        [42.3395648043,
-        -71.1026941935],
-        [42.3268347904,
-        -71.099189638],
-        [42.3346188381,
-        -71.10290921076667]
-    ]
+
+	centroidData = [];
+
+	kMeansList = rawKMeansData[0]['coordinates'];
+
+	var i = 0;
+	for (i = 0; i < kMeansList.length; i++) {
+		centroidData.push([kMeansList[i][0][0], kMeansList[i][0][1]]);
+	}
+
+
+	return centroidData;
 }
 
-function kMeansData() {
-	return [
-		new google.maps.LatLng(42.3340820819,
-		-71.10586771785),
-		new google.maps.LatLng(42.3495376231,
-		-71.1419411892),
-		new google.maps.LatLng(42.331648631075,
-		-71.098239928575),
-		new google.maps.LatLng(42.33046328958,
-		-71.1070608519),
-		new google.maps.LatLng(42.3360449123,
-		-71.10826387746667),
-		new google.maps.LatLng(42.3358606402,
-		-71.0996350065),
-		new google.maps.LatLng(42.3395648043,
-		-71.1026941935),
-		new google.maps.LatLng(42.3268347904,
-		-71.099189638),
-		new google.maps.LatLng(42.3346188381,
-		-71.10290921076667)
-	];
-}
-
-function kMeansStuff() {
+function centroidHMLocations() {
 	centroidData = []
-	alert(JSON.stringify(rawKMeansData[0]));
+	alert(JSON.stringify(rawKMeansData[0]['coordinates']));
+	kMeansList = rawKMeansData[0]['coordinates'];
 	console.log(rawKMeansData);
 	//alert(rawKeansData[0]);
-	/*
+	
 	var i = 0;
-	for (i = 0; i < rawKMeansData.length; i++) {
-		//alert(rawKMeansData[i])
-		centroidData.push(new google.maps.LatLng(rawKMeansData[0][i][0], rawKMeansData[0][i][1]));
-	}*/
+	for (i = 0; i < kMeansList.length; i++) {
+		centroidData.push(new google.maps.LatLng(kMeansList[i][0][0], kMeansList[i][0][1]));
+	}
 
 	return centroidData;
 }

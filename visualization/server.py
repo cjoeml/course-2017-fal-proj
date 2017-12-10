@@ -2,6 +2,10 @@ from flask import Flask, render_template, request
 from pymongo import MongoClient # Database connector
 import urllib.parse
 import json
+from sklearn.cluster import KMeans
+import sys
+import math
+import numpy as np
 import z3_routes_interactive
 import pdb
 import dml
@@ -29,12 +33,53 @@ def visualization():
         return "Please enter a valid integer input"
 
     if routes > 0 and means > 0:
+
+        '''
+        Generates kmeans data to be used in visualization
+        '''
+        building_list = []
+
+        for building in db['bkin18_cjoe_klovett_sbrz.property_assessment_impBuilds'].find():
+            if building['LATITUDE'] == '#N/A' or building['LONGITUDE'] == '#N/A':
+                pass
+            else:
+                building_list.append( [float(building['LATITUDE']), float(building['LONGITUDE'])] )
+
+        kmeans = KMeans(n_clusters=means)
+        kmeans.fit(building_list)
+
+        kmean_list = kmeans.cluster_centers_.tolist()
+        closest_buildings_to_centroids = []
+
+        for p1 in kmean_list:
+            min_dist = sys.maxsize
+    
+            # Iterate through important buildings and find closest one (aka last_building)
+            for building in db['bkin18_cjoe_klovett_sbrz.property_assessment_impBuilds'].find():
+                if building['LATITUDE'] == '#N/A' or building['LONGITUDE'] == '#N/A':
+                    pass
+                else:
+                    p2 = ( float(building['LATITUDE']), float(building['LONGITUDE']) )
+                    distance = math.sqrt( (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 )
+                    if distance < min_dist:
+                        min_dist = distance
+                        last_building = building
+
+            # Rebuild buildings to include its ID and the centroids it is closest to
+
+            this_building = {}
+            this_building['_id'] = last_building
+            this_building['NEARBY_CENTROID'] = p1
+            this_building["DIST_TO_CENTROID"] = min_dist
+            
+            closest_buildings_to_centroids.append(this_building)
+
         '''
         Formats kmeans data to be used in visualization
         '''
         kMeansCoordinateList = []
 
-        for kmeans_info in db['bkin18_cjoe_klovett_sbrz.closest_buildings_to_centroids'].find():
+        for kmeans_info in closest_buildings_to_centroids:
             coordinate_list = []
             centroid_coordinates = kmeans_info['NEARBY_CENTROID']
             nearest_building_info = kmeans_info['_id']
@@ -44,7 +89,6 @@ def visualization():
             kMeansCoordinateList.append(coordinate_list)
 
         kMeansData = [{'coordinates': kMeansCoordinateList}]
-
 
 
 
